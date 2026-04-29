@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  hashedPassword String
+  role           String
+  createdAt      DateTime        @default(now())
+  studentProfile StudentProfile?
+  companyProfile CompanyProfile?
+}
+
+model StudentProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName      String
+  lastName       String
+  gender         String?
+  dateOfBirth    String?
+  phone          String?
+  address        String?
+  latitude       Float?
+  longitude      Float?
+  diploma        String?
+  school         String?
+  skills         String  @default("[]")
+  jobTypes       String  @default("[]")
+  availabilities String  @default("{}")
+  iban           String?
+  bic            String?
+  photoUrl       String?
+  cvUrl          String?
+  coverLetterUrl String?
+  matches        Match[]
+}
+
+model CompanyProfile {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName  String
+  siret        String?
+  activityType String  @default("AUTRE")
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  phone        String?
+  website      String?
+  logoUrl      String?
+  iban         String?
+  bic          String?
+  offers       Offer[]
+}
+
+model Offer {
+  id               String         @id @default(cuid())
+  companyProfileId String
+  company          CompanyProfile @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
+  title            String
+  description      String
+  requiredSkills   String         @default("[]")
+  jobType          String?
+  startDate        String
+  endDate          String
+  schedules        String         @default("{}")
+  hourlyRate       Float
+  location         String
+  latitude         Float?
+  longitude        Float?
+  nbPositions      Int            @default(1)
+  status           String         @default("ACTIVE")
+  createdAt        DateTime       @default(now())
+  matches          Match[]
+}
+
+model Match {
+  id               String          @id @default(cuid())
+  studentProfileId String
+  student          StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  offerId          String
+  offer            Offer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  score            Float
+  status           String          @default("EN_ATTENTE")
+  createdAt        DateTime        @default(now())
+  messages         Message[]
+  calendarEvents   CalendarEvent[]
+  contracts        Contract[]
+
+  @@unique([studentProfileId, offerId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  senderId  String
+  content   String?
+  fileUrl   String?
+  createdAt DateTime @default(now())
+}
+
+model CalendarEvent {
+  id        String  @id @default(cuid())
+  matchId   String
+  match     Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  date      String
+  startTime String
+  endTime   String
+  note      String?
+}
+
+model Contract {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  content   String
+  pdfUrl    String?
+  status    String   @default("ENVOYE")
+  createdAt DateTime @default(now())
+}
