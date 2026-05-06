@@ -4,47 +4,38 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
+import { User } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPw, setShowPw] = useState(false);
+  const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!username.trim()) return;
     setLoading(true);
     setError("");
 
     const result = await signIn("credentials", {
-      email,
-      password,
+      username: username.trim(),
       redirect: false,
     });
 
     setLoading(false);
 
     if (result?.error) {
-      setError("Email ou mot de passe incorrect.");
+      setError("Pseudo introuvable. Vérifie ton identifiant.");
       return;
     }
 
-    const res = await fetch("/api/profile");
-    const data = await res.json();
-
-    if (data.profile?.userId) {
-      const roleRes = await fetch("/api/auth/session");
-      const session = await roleRes.json();
-      const role = session?.user?.role;
-      if (role === "STUDENT") router.push("/student/missions");
-      else if (role === "COMPANY") router.push("/company/offers");
-      else router.push("/");
-    } else {
-      router.push("/");
-    }
+    const res = await fetch("/api/auth/session");
+    const session = await res.json();
+    const role = session?.user?.role;
+    if (role === "STUDENT") router.push("/student/missions");
+    else if (role === "COMPANY") router.push("/company/offers");
+    else router.push("/");
   }
 
   return (
@@ -65,42 +56,25 @@ export default function LoginPage() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-sans font-light" style={{ color: "#393E41" }}>Email</label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ton@email.com"
-              required
-              className="rounded-xl h-12"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-sans font-light" style={{ color: "#393E41" }}>Mot de passe</label>
+            <label className="text-sm font-sans font-light" style={{ color: "#393E41" }}>Pseudo</label>
             <div className="relative">
+              <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <Input
-                type={showPw ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="ton-pseudo"
                 required
-                className="rounded-xl h-12 pr-10"
+                className="rounded-xl h-12 pl-9"
+                autoComplete="username"
+                autoCapitalize="none"
               />
-              <button
-                type="button"
-                onClick={() => setShowPw(!showPw)}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-                style={{ color: "#9ca3af" }}
-              >
-                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
             </div>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !username.trim()}
             className="w-full py-4 rounded-xl text-white font-heading text-base mt-2 disabled:opacity-60"
             style={{ backgroundColor: "#FD8F03" }}
           >

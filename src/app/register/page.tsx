@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Logo } from "@/components/Logo";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
 
 const DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
 const SLOTS = ["matin", "aprem", "soir"];
@@ -20,11 +19,9 @@ function RegisterForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showPw, setShowPw] = useState(false);
 
   const [form, setForm] = useState({
-    email: "",
-    password: "",
+    username: "",
     firstName: "",
     lastName: "",
     phone: "",
@@ -47,18 +44,14 @@ function RegisterForm() {
   function toggleSkill(skill: string) {
     setForm((f) => ({
       ...f,
-      skills: f.skills.includes(skill)
-        ? f.skills.filter((s) => s !== skill)
-        : [...f.skills, skill],
+      skills: f.skills.includes(skill) ? f.skills.filter((s) => s !== skill) : [...f.skills, skill],
     }));
   }
 
   function toggleJobType(jt: string) {
     setForm((f) => ({
       ...f,
-      jobTypes: f.jobTypes.includes(jt)
-        ? f.jobTypes.filter((s) => s !== jt)
-        : [...f.jobTypes, jt],
+      jobTypes: f.jobTypes.includes(jt) ? f.jobTypes.filter((s) => s !== jt) : [...f.jobTypes, jt],
     }));
   }
 
@@ -67,10 +60,7 @@ function RegisterForm() {
       const dayAvail = f.availabilities[day] || { matin: false, aprem: false, soir: false };
       return {
         ...f,
-        availabilities: {
-          ...f.availabilities,
-          [day]: { ...dayAvail, [slot]: !dayAvail[slot as keyof typeof dayAvail] },
-        },
+        availabilities: { ...f.availabilities, [day]: { ...dayAvail, [slot]: !dayAvail[slot as keyof typeof dayAvail] } },
       };
     });
   }
@@ -93,11 +83,7 @@ function RegisterForm() {
         return;
       }
 
-      await signIn("credentials", {
-        email: form.email,
-        password: form.password,
-        redirect: false,
-      });
+      await signIn("credentials", { username: form.username, redirect: false });
 
       if (role === "STUDENT") router.push("/student/missions");
       else router.push("/company/offers");
@@ -134,35 +120,37 @@ function RegisterForm() {
           </p>
         )}
 
-        {/* Step 1: Credentials */}
+        {/* Step 1 — Identité */}
         {step === 1 && (
           <div className="flex flex-col gap-4">
-            <h2 className="font-heading text-xl" style={{ color: "#393E41" }}>Créer ton compte</h2>
+            <div>
+              <h2 className="font-heading text-xl" style={{ color: "#393E41" }}>
+                {isStudent ? "Qui es-tu ?" : "Ton entreprise"}
+              </h2>
+              <p className="font-sans font-light text-xs mt-1" style={{ color: "#9ca3af" }}>
+                Choisis un pseudo pour te connecter
+              </p>
+            </div>
             <div className="flex flex-col gap-3">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={form.email}
-                onChange={(e) => setField("email", e.target.value)}
-                className="rounded-xl h-12"
-              />
-              <div className="relative">
+              <div className="flex flex-col gap-1">
                 <Input
-                  type={showPw ? "text" : "password"}
-                  placeholder="Mot de passe"
-                  value={form.password}
-                  onChange={(e) => setField("password", e.target.value)}
-                  className="rounded-xl h-12 pr-10"
+                  type="text"
+                  placeholder="Pseudo (ex: lucas-m)"
+                  value={form.username}
+                  onChange={(e) => setField("username", e.target.value.toLowerCase().replace(/\s+/g, "-"))}
+                  className="rounded-xl h-12"
+                  autoCapitalize="none"
                 />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                <p className="text-xs font-sans font-light pl-1" style={{ color: "#9ca3af" }}>
+                  Ce sera ton identifiant pour te reconnecter
+                </p>
               </div>
+
               {isStudent ? (
                 <>
                   <Input placeholder="Prénom" value={form.firstName} onChange={(e) => setField("firstName", e.target.value)} className="rounded-xl h-12" />
                   <Input placeholder="Nom" value={form.lastName} onChange={(e) => setField("lastName", e.target.value)} className="rounded-xl h-12" />
-                  <Input placeholder="Téléphone" value={form.phone} onChange={(e) => setField("phone", e.target.value)} className="rounded-xl h-12" />
+                  <Input placeholder="Téléphone (optionnel)" value={form.phone} onChange={(e) => setField("phone", e.target.value)} className="rounded-xl h-12" />
                 </>
               ) : (
                 <>
@@ -196,40 +184,26 @@ function RegisterForm() {
               <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>Compétences</p>
               <div className="flex flex-wrap gap-2">
                 {SKILLS_SUGGESTIONS.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => toggleSkill(s)}
+                  <button key={s} type="button" onClick={() => toggleSkill(s)}
                     className="px-3 py-1.5 rounded-full text-sm font-sans font-light border transition-colors"
-                    style={
-                      form.skills.includes(s)
-                        ? { backgroundColor: "#FD8F03", color: "white", borderColor: "#FD8F03" }
-                        : { backgroundColor: "white", color: "#393E41", borderColor: "#e2e3d8" }
-                    }
-                  >
-                    {s}
-                  </button>
+                    style={form.skills.includes(s)
+                      ? { backgroundColor: "#FD8F03", color: "white", borderColor: "#FD8F03" }
+                      : { backgroundColor: "white", color: "#393E41", borderColor: "#e2e3d8" }}
+                  >{s}</button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>Types de jobs souhaités</p>
+              <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>Types de jobs</p>
               <div className="flex flex-wrap gap-2">
                 {JOB_TYPES.map((jt) => (
-                  <button
-                    key={jt}
-                    type="button"
-                    onClick={() => toggleJobType(jt)}
+                  <button key={jt} type="button" onClick={() => toggleJobType(jt)}
                     className="px-3 py-1.5 rounded-full text-sm font-sans font-light border transition-colors"
-                    style={
-                      form.jobTypes.includes(jt)
-                        ? { backgroundColor: "#2292A4", color: "white", borderColor: "#2292A4" }
-                        : { backgroundColor: "white", color: "#393E41", borderColor: "#e2e3d8" }
-                    }
-                  >
-                    {jt}
-                  </button>
+                    style={form.jobTypes.includes(jt)
+                      ? { backgroundColor: "#2292A4", color: "white", borderColor: "#2292A4" }
+                      : { backgroundColor: "white", color: "#393E41", borderColor: "#e2e3d8" }}
+                  >{jt}</button>
                 ))}
               </div>
             </div>
@@ -261,13 +235,10 @@ function RegisterForm() {
                 <tbody>
                   {DAYS.map((day) => (
                     <tr key={day} className="border-t border-gray-100">
-                      <td className="py-2 capitalize font-sans font-light text-xs" style={{ color: "#393E41" }}>
-                        {day.slice(0, 3)}
-                      </td>
+                      <td className="py-2 capitalize font-sans font-light text-xs" style={{ color: "#393E41" }}>{day.slice(0, 3)}</td>
                       {SLOTS.map((slot) => (
                         <td key={slot} className="py-2 text-center">
-                          <input
-                            type="checkbox"
+                          <input type="checkbox"
                             checked={form.availabilities[day]?.[slot] || false}
                             onChange={() => toggleAvail(day, slot)}
                             className="w-4 h-4 rounded"
@@ -280,13 +251,7 @@ function RegisterForm() {
                 </tbody>
               </table>
             </div>
-
-            <Input
-              placeholder="Ville (ex: Paris)"
-              value={form.address}
-              onChange={(e) => setField("address", e.target.value)}
-              className="rounded-xl h-12"
-            />
+            <Input placeholder="Ville (ex: Paris)" value={form.address} onChange={(e) => setField("address", e.target.value)} className="rounded-xl h-12" />
           </div>
         )}
 
@@ -294,46 +259,33 @@ function RegisterForm() {
         {step === 2 && !isStudent && (
           <div className="flex flex-col gap-4">
             <h2 className="font-heading text-xl" style={{ color: "#393E41" }}>Adresse de l'entreprise</h2>
-            <Input
-              placeholder="Adresse complète"
-              value={form.address}
-              onChange={(e) => setField("address", e.target.value)}
-              className="rounded-xl h-12"
-            />
+            <Input placeholder="Adresse complète" value={form.address} onChange={(e) => setField("address", e.target.value)} className="rounded-xl h-12" />
           </div>
         )}
 
         {/* Navigation */}
         <div className="flex gap-3 pb-8">
           {step > 1 && (
-            <button
-              type="button"
-              onClick={() => setStep((s) => s - 1)}
+            <button type="button" onClick={() => setStep((s) => s - 1)}
               className="flex-1 py-4 rounded-xl font-heading text-base border-2"
               style={{ borderColor: "#2292A4", color: "#2292A4" }}
-            >
-              Retour
-            </button>
+            >Retour</button>
           )}
           {step < totalSteps ? (
-            <button
-              type="button"
-              onClick={() => setStep((s) => s + 1)}
+            <button type="button"
+              onClick={() => {
+                if (step === 1 && !form.username.trim()) { setError("Choisis un pseudo pour continuer"); return; }
+                setError("");
+                setStep((s) => s + 1);
+              }}
               className="flex-1 py-4 rounded-xl text-white font-heading text-base"
               style={{ backgroundColor: "#FD8F03" }}
-            >
-              Suivant
-            </button>
+            >Suivant</button>
           ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={loading}
+            <button type="button" onClick={handleSubmit} disabled={loading}
               className="flex-1 py-4 rounded-xl text-white font-heading text-base disabled:opacity-60"
               style={{ backgroundColor: "#FD8F03" }}
-            >
-              {loading ? "Création..." : "Créer mon compte"}
-            </button>
+            >{loading ? "Création..." : "C'est parti !"}</button>
           )}
         </div>
       </div>
