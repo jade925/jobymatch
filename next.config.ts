@@ -6,10 +6,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "10mb",
-    },
+  generateBuildId: async () => {
+    return `build-${Date.now()}`;
   },
 };
 

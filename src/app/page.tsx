@@ -1,3 +1,4 @@
+// v2 – client-side only, no auth
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
