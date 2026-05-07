@@ -7,10 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { MapPin } from "lucide-react";
+import { saveOffer, getCompanyProfile, genId } from "@/lib/storage";
+import type { Offer } from "@/lib/storage";
 
 const DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
-const SKILLS_SUGGESTIONS = ["Service en salle", "Caisse", "Cuisine", "Manutention", "Vente", "Accueil", "Conduite", "Informatique", "Langues", "Communication"];
-const JOB_TYPES = ["Restauration", "Commerce", "Événementiel", "Services", "Livraison", "Hôtellerie", "Autre"];
+const SKILLS_SUGGESTIONS = [
+  "Service en salle","Caisse","Cuisine","Manutention","Vente",
+  "Accueil","Conduite","Informatique","Langues","Communication",
+];
+const JOB_TYPES = [
+  "Restauration","Commerce","Événementiel","Services","Livraison","Hôtellerie","Autre",
+];
 
 type ScheduleEntry = { start: string; end: string };
 
@@ -37,7 +44,6 @@ type OfferFormProps = {
 
 export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState<FormData>({
@@ -67,11 +73,8 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
   function toggleDay(day: string) {
     setForm((f) => {
       const schedules = { ...f.schedules };
-      if (schedules[day]) {
-        delete schedules[day];
-      } else {
-        schedules[day] = { start: "09:00", end: "17:00" };
-      }
+      if (schedules[day]) delete schedules[day];
+      else schedules[day] = { start: "09:00", end: "17:00" };
       return { ...f, schedules };
     });
   }
@@ -81,7 +84,10 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
       ...f,
       schedules: {
         ...f.schedules,
-        [day]: { ...(f.schedules[day] || { start: "09:00", end: "17:00" }), [field]: value },
+        [day]: {
+          ...(f.schedules[day] || { start: "09:00", end: "17:00" }),
+          [field]: value,
+        },
       },
     }));
   }
@@ -100,43 +106,53 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
     } catch {}
   }
 
-  async function handleSubmit() {
-    setLoading(true);
+  function handleSubmit() {
     setError("");
-
-    try {
-      const url = mode === "create" ? "/api/offers" : `/api/offers/${offerId}`;
-      const method = mode === "create" ? "POST" : "PATCH";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Erreur");
-        setLoading(false);
-        return;
-      }
-
-      router.push("/company/offers");
-      router.refresh();
-    } catch {
-      setError("Erreur réseau");
-      setLoading(false);
+    if (!form.title.trim()) {
+      setError("L'intitulé du poste est requis.");
+      return;
     }
+
+    const profile = getCompanyProfile();
+    const id = offerId || genId();
+
+    const offer: Offer = {
+      id,
+      title: form.title,
+      description: form.description,
+      location: form.location,
+      startDate: form.startDate,
+      endDate: form.endDate,
+      hourlyRate: form.hourlyRate,
+      nbPositions: form.nbPositions,
+      latitude: form.latitude,
+      longitude: form.longitude,
+      requiredSkills: form.requiredSkills,
+      schedules: form.schedules,
+      jobType: form.jobType,
+      status: "ACTIVE",
+      companyName: profile?.companyName || "Mon entreprise",
+      logoUrl: profile?.logoUrl || null,
+      activityType: profile?.activityType || "AUTRE",
+      isDemo: false,
+    };
+
+    saveOffer(offer);
+    router.push("/company/offers");
+    router.refresh();
   }
 
-  const mapCenter = form.latitude && form.longitude
-    ? { lat: form.latitude, lng: form.longitude }
-    : { lat: 48.8566, lng: 2.3522 };
+  const mapCenter =
+    form.latitude && form.longitude
+      ? { lat: form.latitude, lng: form.longitude }
+      : { lat: 48.8566, lng: 2.3522 };
 
   return (
     <div className="flex flex-col gap-5 px-4 py-5">
       {error && (
-        <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>
+        <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          {error}
+        </p>
       )}
 
       <div className="flex flex-col gap-3">
@@ -146,11 +162,12 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
           className="rounded-xl h-12"
         />
-
         <Textarea
           placeholder="Description du poste..."
           value={form.description}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, description: e.target.value }))
+          }
           className="rounded-xl min-h-24"
           rows={4}
         />
@@ -158,7 +175,12 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
 
       {/* Compétences */}
       <div>
-        <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>Compétences requises</p>
+        <p
+          className="font-sans font-light text-sm mb-2"
+          style={{ color: "#6b7280" }}
+        >
+          Compétences requises
+        </p>
         <div className="flex flex-wrap gap-2">
           {SKILLS_SUGGESTIONS.map((s) => (
             <button
@@ -180,13 +202,20 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
 
       {/* Job type */}
       <div>
-        <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>Type de job</p>
+        <p
+          className="font-sans font-light text-sm mb-2"
+          style={{ color: "#6b7280" }}
+        >
+          Type de job
+        </p>
         <div className="flex flex-wrap gap-2">
           {JOB_TYPES.map((jt) => (
             <button
               key={jt}
               type="button"
-              onClick={() => setForm((f) => ({ ...f, jobType: f.jobType === jt ? "" : jt }))}
+              onClick={() =>
+                setForm((f) => ({ ...f, jobType: f.jobType === jt ? "" : jt }))
+              }
               className="px-3 py-1.5 rounded-full text-xs font-sans font-light border"
               style={
                 form.jobType === jt
@@ -203,18 +232,47 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
       {/* Dates */}
       <div className="flex gap-3">
         <div className="flex-1">
-          <p className="font-sans font-light text-xs mb-1" style={{ color: "#6b7280" }}>Début</p>
-          <Input type="date" value={form.startDate} onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} className="rounded-xl h-11" />
+          <p
+            className="font-sans font-light text-xs mb-1"
+            style={{ color: "#6b7280" }}
+          >
+            Début
+          </p>
+          <Input
+            type="date"
+            value={form.startDate}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, startDate: e.target.value }))
+            }
+            className="rounded-xl h-11"
+          />
         </div>
         <div className="flex-1">
-          <p className="font-sans font-light text-xs mb-1" style={{ color: "#6b7280" }}>Fin</p>
-          <Input type="date" value={form.endDate} onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} className="rounded-xl h-11" />
+          <p
+            className="font-sans font-light text-xs mb-1"
+            style={{ color: "#6b7280" }}
+          >
+            Fin
+          </p>
+          <Input
+            type="date"
+            value={form.endDate}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, endDate: e.target.value }))
+            }
+            className="rounded-xl h-11"
+          />
         </div>
       </div>
 
       {/* Horaires */}
       <div>
-        <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>Horaires par jour</p>
+        <p
+          className="font-sans font-light text-sm mb-2"
+          style={{ color: "#6b7280" }}
+        >
+          Horaires par jour
+        </p>
         <div className="space-y-2">
           {DAYS.map((day) => (
             <div key={day} className="flex items-center gap-2">
@@ -254,27 +312,45 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
 
       {/* Rémunération */}
       <div>
-        <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>
-          Rémunération : <strong style={{ color: "#FD8F03" }}>{form.hourlyRate.toFixed(2)} €/h</strong>
+        <p
+          className="font-sans font-light text-sm mb-2"
+          style={{ color: "#6b7280" }}
+        >
+          Rémunération :{" "}
+          <strong style={{ color: "#FD8F03" }}>
+            {form.hourlyRate.toFixed(2)} €/h
+          </strong>
         </p>
         <Slider
           min={11.88}
           max={30}
           step={0.1}
           value={[form.hourlyRate]}
-          onValueChange={(vals) => setForm((f) => ({ ...f, hourlyRate: Array.isArray(vals) ? vals[0] : vals }))}
+          onValueChange={(vals) =>
+            setForm((f) => ({
+              ...f,
+              hourlyRate: Array.isArray(vals) ? vals[0] : vals,
+            }))
+          }
           className="my-2"
         />
       </div>
 
       {/* Lieu */}
       <div>
-        <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>Lieu</p>
+        <p
+          className="font-sans font-light text-sm mb-2"
+          style={{ color: "#6b7280" }}
+        >
+          Lieu
+        </p>
         <div className="flex gap-2">
           <Input
             placeholder="Adresse de la mission"
             value={form.location}
-            onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, location: e.target.value }))
+            }
             className="rounded-xl h-12 flex-1"
           />
           <button
@@ -288,34 +364,47 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
         </div>
         {form.latitude && form.longitude && (
           <MapProvider>
-          <div className="rounded-2xl overflow-hidden mt-3" style={{ height: 200 }}>
-            <Map
-              defaultCenter={mapCenter}
-              defaultZoom={15}
-              gestureHandling="cooperative"
-              disableDefaultUI
-              mapId="offer-form-map"
+            <div
+              className="rounded-2xl overflow-hidden mt-3"
+              style={{ height: 200 }}
             >
-              <AdvancedMarker position={mapCenter}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center shadow" style={{ backgroundColor: "#FD8F03" }}>
-                  <MapPin size={14} color="white" />
-                </div>
-              </AdvancedMarker>
-            </Map>
-          </div>
+              <Map
+                defaultCenter={mapCenter}
+                defaultZoom={15}
+                gestureHandling="cooperative"
+                disableDefaultUI
+                mapId="offer-form-map"
+              >
+                <AdvancedMarker position={mapCenter}>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center shadow"
+                    style={{ backgroundColor: "#FD8F03" }}
+                  >
+                    <MapPin size={14} color="white" />
+                  </div>
+                </AdvancedMarker>
+              </Map>
+            </div>
           </MapProvider>
         )}
       </div>
 
       {/* Nb postes */}
       <div>
-        <p className="font-sans font-light text-sm mb-2" style={{ color: "#6b7280" }}>Nombre de postes</p>
+        <p
+          className="font-sans font-light text-sm mb-2"
+          style={{ color: "#6b7280" }}
+        >
+          Nombre de postes
+        </p>
         <Input
           type="number"
           min={1}
           max={99}
           value={form.nbPositions}
-          onChange={(e) => setForm((f) => ({ ...f, nbPositions: parseInt(e.target.value) || 1 }))}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, nbPositions: parseInt(e.target.value) || 1 }))
+          }
           className="rounded-xl h-12 w-24"
         />
       </div>
@@ -333,11 +422,10 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={loading}
-          className="flex-1 py-4 rounded-xl text-white font-heading text-base disabled:opacity-60"
+          className="flex-1 py-4 rounded-xl text-white font-heading text-base"
           style={{ backgroundColor: "#FD8F03" }}
         >
-          {loading ? "Envoi..." : mode === "create" ? "Publier l'offre" : "Sauvegarder"}
+          {mode === "create" ? "Publier l'offre" : "Sauvegarder"}
         </button>
       </div>
     </div>

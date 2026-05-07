@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { League_Spartan, Poppins } from "next/font/google";
-import { SessionProvider } from "@/components/SessionProvider";
 import "./globals.css";
 
 const leagueSpartan = League_Spartan({
@@ -36,9 +35,7 @@ export default function RootLayout({
       lang="fr"
       className={`${leagueSpartan.variable} ${poppins.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col antialiased">
-        <SessionProvider>{children}</SessionProvider>
-      </body>
+      <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>
   );
 }

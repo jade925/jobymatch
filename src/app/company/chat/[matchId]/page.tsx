@@ -1,55 +1,47 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { ArrowLeft, Paperclip, Send } from "lucide-react";
-
-type Message = {
-  id: string;
-  senderId: string;
-  content: string | null;
-  fileUrl: string | null;
-  createdAt: string;
-};
+import { ArrowLeft, Send } from "lucide-react";
+import { getMatches, getMessages, addMessage, genId } from "@/lib/storage";
+import type { Match, Message } from "@/lib/storage";
 
 export default function CompanyChatThreadPage() {
-  const { data: session } = useSession();
   const params = useParams();
   const router = useRouter();
   const matchId = params.matchId as string;
 
+  const [match, setMatch] = useState<Match | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  async function loadMessages() {
-    const res = await fetch(`/api/messages?matchId=${matchId}`);
-    const data = await res.json();
-    setMessages(data.messages || []);
+  function refresh() {
+    const m = getMatches().find((m) => m.id === matchId) || null;
+    setMatch(m);
+    setMessages(getMessages(matchId));
   }
 
   useEffect(() => {
-    loadMessages();
-    const interval = setInterval(loadMessages, 3000);
-    return () => clearInterval(interval);
+    refresh();
+    const iv = setInterval(refresh, 2000);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  async function sendMessage() {
+  function sendMessage() {
     if (!text.trim()) return;
-    setSending(true);
-    await fetch("/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ matchId, content: text.trim() }),
+    addMessage(matchId, {
+      id: genId(),
+      content: text.trim(),
+      sender: "company",
+      createdAt: new Date().toISOString(),
     });
     setText("");
-    setSending(false);
-    loadMessages();
+    refresh();
   }
 
   return (
@@ -58,27 +50,46 @@ export default function CompanyChatThreadPage() {
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} style={{ color: "#393E41" }} />
         </button>
-        <h1 className="font-heading text-lg" style={{ color: "#393E41" }}>Conversation</h1>
+        <div>
+          <p className="font-heading text-base" style={{ color: "#393E41" }}>
+            Étudiant(e)
+          </p>
+          <p
+            className="font-sans font-light text-xs"
+            style={{ color: "#9ca3af" }}
+          >
+            {match?.offerTitle}
+          </p>
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar-none">
+        {messages.length === 0 && (
+          <p
+            className="text-center font-sans font-light text-xs pt-6"
+            style={{ color: "#9ca3af" }}
+          >
+            Début de la conversation
+          </p>
+        )}
         {messages.map((msg) => {
-          const isMe = msg.senderId === session?.user?.id;
+          const isMe = msg.sender === "company";
           return (
-            <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+            <div
+              key={msg.id}
+              className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+            >
               <div
                 className="max-w-[75%] px-4 py-2.5 text-sm font-sans font-light"
                 style={{
                   backgroundColor: isMe ? "#2292A4" : "#F6F7EB",
                   color: isMe ? "white" : "#393E41",
-                  borderRadius: isMe ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                  borderRadius: isMe
+                    ? "16px 16px 4px 16px"
+                    : "16px 16px 16px 4px",
                 }}
               >
-                {msg.content || (
-                  <a href={msg.fileUrl!} target="_blank" rel="noreferrer" className="underline">
-                    📎 Fichier joint
-                  </a>
-                )}
+                {msg.content}
               </div>
             </div>
           );
@@ -87,18 +98,19 @@ export default function CompanyChatThreadPage() {
       </div>
 
       <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2">
-        <Paperclip size={20} style={{ color: "#9ca3af" }} />
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+          onKeyDown={(e) =>
+            e.key === "Enter" && !e.shiftKey && sendMessage()
+          }
           placeholder="Écrire un message..."
           className="flex-1 h-10 px-3 rounded-full border font-sans font-light text-sm outline-none"
           style={{ borderColor: "#e2e3d8", backgroundColor: "#F6F7EB" }}
         />
         <button
           onClick={sendMessage}
-          disabled={sending || !text.trim()}
+          disabled={!text.trim()}
           className="w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-40"
           style={{ backgroundColor: "#2292A4" }}
         >

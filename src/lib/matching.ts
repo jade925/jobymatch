@@ -1,18 +1,4 @@
-type StudentProfile = {
-  skills: string;
-  jobTypes: string;
-  availabilities: string;
-  latitude: number | null;
-  longitude: number | null;
-};
-
-type Offer = {
-  requiredSkills: string;
-  jobType: string | null;
-  schedules: string;
-  latitude: number | null;
-  longitude: number | null;
-};
+import type { StudentProfile, Offer } from "./storage";
 
 function scoreSkills(studentSkills: string[], requiredSkills: string[]): number {
   if (requiredSkills.length === 0) return 100;
@@ -22,7 +8,10 @@ function scoreSkills(studentSkills: string[], requiredSkills: string[]): number 
   return (matched.length / requiredSkills.length) * 100;
 }
 
-function scoreAvailabilities(studentAvail: Record<string, Record<string, boolean>>, schedules: Record<string, { start: string; end: string } | null>): number {
+function scoreAvailabilities(
+  studentAvail: Record<string, Record<string, boolean>>,
+  schedules: Record<string, { start: string; end: string } | null>
+): number {
   const days = Object.keys(schedules);
   if (days.length === 0) return 100;
   let matched = 0;
@@ -61,7 +50,7 @@ function scoreDistance(
   return 0;
 }
 
-function scoreJobType(studentJobTypes: string[], offerJobType: string | null): number {
+function scoreJobType(studentJobTypes: string[], offerJobType: string): number {
   if (!offerJobType) return 100;
   return studentJobTypes.some(
     (t) => t.toLowerCase() === offerJobType.toLowerCase()
@@ -70,17 +59,19 @@ function scoreJobType(studentJobTypes: string[], offerJobType: string | null): n
     : 0;
 }
 
-export function computeMatchScore(student: StudentProfile, offer: Offer): number {
-  const studentSkills: string[] = JSON.parse(student.skills || "[]");
-  const requiredSkills: string[] = JSON.parse(offer.requiredSkills || "[]");
-  const studentJobTypes: string[] = JSON.parse(student.jobTypes || "[]");
-  const studentAvail = JSON.parse(student.availabilities || "{}");
-  const schedules = JSON.parse(offer.schedules || "{}");
-
-  const s1 = scoreSkills(studentSkills, requiredSkills);
-  const s2 = scoreAvailabilities(studentAvail, schedules);
-  const s3 = scoreDistance(student.latitude, student.longitude, offer.latitude, offer.longitude);
-  const s4 = scoreJobType(studentJobTypes, offer.jobType);
+export function computeMatchScore(
+  student: StudentProfile,
+  offer: Offer
+): number {
+  const s1 = scoreSkills(student.skills, offer.requiredSkills);
+  const s2 = scoreAvailabilities(student.availabilities, offer.schedules);
+  const s3 = scoreDistance(
+    student.latitude,
+    student.longitude,
+    offer.latitude,
+    offer.longitude
+  );
+  const s4 = scoreJobType(student.jobTypes, offer.jobType);
 
   return Math.round(s1 * 0.4 + s2 * 0.3 + s3 * 0.2 + s4 * 0.1);
 }
