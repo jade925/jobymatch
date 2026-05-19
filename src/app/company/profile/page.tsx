@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Map, AdvancedMarker } from "@vis.gl/react-google-maps";
-import { MapProvider } from "@/components/MapProvider";
-import { Pencil, Trash2, MapPin, LogOut } from "lucide-react";
+import {
+  Pencil, Trash2, MapPin, LogOut, Phone, Globe,
+  FileText, CreditCard, Settings,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 import {
   getCompanyProfile,
   setCompanyProfile,
@@ -54,8 +55,13 @@ export default function CompanyProfilePage() {
     const p = getCompanyProfile() || DEFAULT_PROFILE;
     setProfile(p);
     setForm(p);
-    if (!getCompanyProfile()) setEditing(true);
+    // Ne pas ouvrir automatiquement le dialog
   }, []);
+
+  function openEdit() {
+    setForm(profile);
+    setEditing(true);
+  }
 
   function saveProfile() {
     setCompanyProfile(form);
@@ -77,20 +83,19 @@ export default function CompanyProfilePage() {
     if (!form.address) return;
     try {
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(form.address)}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.address)}&format=json&limit=1`,
+        { headers: { "Accept-Language": "fr" } }
       );
       const data = await res.json();
-      if (data.results?.[0]?.geometry?.location) {
-        const { lat, lng } = data.results[0].geometry.location;
-        setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
+      if (data[0]) {
+        setForm((f) => ({
+          ...f,
+          latitude: parseFloat(data[0].lat),
+          longitude: parseFloat(data[0].lon),
+        }));
       }
     } catch {}
   }
-
-  const mapCenter =
-    profile.latitude && profile.longitude
-      ? { lat: profile.latitude, lng: profile.longitude }
-      : { lat: 48.8566, lng: 2.3522 };
 
   const activityLabel =
     ACTIVITY_TYPES.find((a) => a.value === profile.activityType)?.label ||
@@ -98,83 +103,96 @@ export default function CompanyProfilePage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <div className="bg-white px-4 pt-12 pb-5 flex items-start justify-between border-b border-gray-100">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden">
-            <span
-              className="font-heading text-xl"
-              style={{ color: "#2292A4" }}
-            >
-              {profile.companyName
-                ? profile.companyName.charAt(0).toUpperCase()
-                : "?"}
-            </span>
-          </div>
-          <div>
-            <h1
-              className="font-heading text-xl"
-              style={{ color: "#393E41" }}
-            >
-              {profile.companyName || "Mon entreprise"}
-            </h1>
-            <p
-              className="font-sans font-light text-sm"
-              style={{ color: "#6b7280" }}
-            >
-              {activityLabel}
-            </p>
-          </div>
+
+      {/* ── Hero entièrement teal ─────────────────────────────────── */}
+      <div
+        className="relative flex-shrink-0 px-5 pt-12 pb-5 lg:pt-6"
+        style={{ background: "linear-gradient(135deg, #2292A4 0%, #1a7a8a 100%)" }}
+      >
+        {/* Boutons en haut à droite */}
+        <div className="absolute top-12 right-4 lg:top-6 flex items-center gap-2">
+          <button
+            onClick={() => router.push("/company/settings")}
+            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
+          >
+            <Settings size={17} color="white" />
+          </button>
+          <button
+            onClick={openEdit}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/20 text-white font-sans font-light text-sm"
+          >
+            <Pencil size={14} />
+            Modifier
+          </button>
         </div>
-        <button
-          onClick={() => { setForm(profile); setEditing(true); }}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-sans font-light"
-          style={{ borderColor: "#FD8F03", color: "#FD8F03" }}
+
+        {/* Avatar */}
+        <div className="mb-3 mt-1">
+          <CompanyAvatar name={profile.companyName || "?"} size="lg" />
+        </div>
+
+        {/* Nom + badge */}
+        <h1 className="font-heading text-xl text-white leading-tight">
+          {profile.companyName || "Mon entreprise"}
+        </h1>
+        <span
+          className="inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-xs font-sans font-light"
+          style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "white" }}
         >
-          <Pencil size={14} />
-          Modifier
-        </button>
+          {activityLabel}
+        </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none pb-6">
-        <Section title="Informations de contact">
-          <InfoRow label="Téléphone" value={profile.phone || "—"} />
-          <InfoRow label="Site web" value={profile.website || "—"} />
-          <InfoRow label="Adresse" value={profile.address || "—"} />
-        </Section>
+      {/* ── Contenu ───────────────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none pb-8">
 
-        <Section title="Informations entreprise">
-          <InfoRow label="Raison sociale" value={profile.companyName || "—"} />
-          <InfoRow label="SIRET" value={profile.siret || "—"} />
-          <InfoRow label="Activité" value={activityLabel} />
-        </Section>
+        {/* Contact */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-1">
+          <h2 className="font-heading text-base mb-2" style={{ color: "#393E41" }}>
+            Informations de contact
+          </h2>
+          <InfoRow icon={<Phone size={15} style={{ color: "#FD8F03" }} />} label="Téléphone" value={profile.phone || "—"} />
+          <InfoRow icon={<Globe size={15} style={{ color: "#FD8F03" }} />} label="Site web" value={profile.website || "—"} />
+          <InfoRow icon={<MapPin size={15} style={{ color: "#FD8F03" }} />} label="Adresse" value={profile.address || "—"} />
+        </div>
 
-        <Section title="Localisation">
-          <MapProvider>
-            <div className="rounded-2xl overflow-hidden mt-2" style={{ height: 200 }}>
-              <Map
-                defaultCenter={mapCenter}
-                defaultZoom={14}
-                gestureHandling="cooperative"
-                disableDefaultUI
-                mapId="company-profile-map"
-              >
-                <AdvancedMarker position={mapCenter}>
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center shadow"
-                    style={{ backgroundColor: "#2292A4" }}
-                  >
-                    <MapPin size={14} color="white" />
-                  </div>
-                </AdvancedMarker>
-              </Map>
-            </div>
-          </MapProvider>
-        </Section>
+        {/* Entreprise */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm space-y-1">
+          <h2 className="font-heading text-base mb-2" style={{ color: "#393E41" }}>
+            Informations entreprise
+          </h2>
+          <InfoRow icon={<FileText size={15} style={{ color: "#FD8F03" }} />} label="SIRET" value={profile.siret || "—"} />
+          <InfoRow icon={<CreditCard size={15} style={{ color: "#FD8F03" }} />} label="IBAN" value={profile.iban || "—"} />
+        </div>
 
+        {/* Carte */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <h2 className="font-heading text-base mb-3" style={{ color: "#393E41" }}>
+            Localisation
+          </h2>
+          <div className="rounded-xl overflow-hidden" style={{ height: 220 }}>
+            {profile.latitude && profile.longitude ? (
+              <iframe
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${profile.longitude - 0.012},${profile.latitude - 0.008},${profile.longitude + 0.012},${profile.latitude + 0.008}&layer=mapnik&marker=${profile.latitude},${profile.longitude}`}
+                className="w-full h-full border-0"
+                title="Localisation"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center gap-2">
+                <MapPin size={28} style={{ color: "#9ca3af" }} />
+                <p className="font-sans font-light text-xs" style={{ color: "#9ca3af" }}>
+                  Renseignez une adresse pour afficher la carte
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Changer de rôle — teal visible */}
         <button
           onClick={handleLeave}
-          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border font-sans font-light text-sm"
-          style={{ borderColor: "#e2e3d8", color: "#9ca3af" }}
+          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-sans font-light text-sm border"
+          style={{ borderColor: "#2292A4", color: "#2292A4", backgroundColor: "rgba(34,146,164,0.06)" }}
         >
           <LogOut size={16} />
           Changer de rôle
@@ -189,7 +207,7 @@ export default function CompanyProfilePage() {
         </button>
       </div>
 
-      {/* Edit Dialog */}
+      {/* ── Dialog modifier ───────────────────────────────────────── */}
       <Dialog open={editing} onOpenChange={setEditing}>
         <DialogContent className="max-w-sm mx-auto rounded-2xl">
           <DialogHeader>
@@ -199,49 +217,40 @@ export default function CompanyProfilePage() {
             <Input
               placeholder="Nom de l'entreprise *"
               value={form.companyName}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, companyName: e.target.value }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
               className="rounded-xl h-12"
             />
             <Input
               placeholder="SIRET"
               value={form.siret || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, siret: e.target.value }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, siret: e.target.value }))}
               className="rounded-xl h-12"
             />
             <Input
               placeholder="Téléphone"
               value={form.phone || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, phone: e.target.value }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               className="rounded-xl h-12"
             />
             <Input
               placeholder="Site web"
               value={form.website || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, website: e.target.value }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
               className="rounded-xl h-12"
             />
             <div className="flex gap-2">
               <Input
                 placeholder="Adresse"
                 value={form.address || ""}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, address: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
                 className="rounded-xl h-12 flex-1"
               />
               <button
                 type="button"
                 onClick={handleGeocodeAddress}
                 className="px-3 h-12 rounded-xl"
-                style={{ backgroundColor: "#F6F7EB", color: "#2292A4" }}
+                style={{ backgroundColor: "#F4F4F4", color: "#2292A4" }}
+                title="Géolocaliser l'adresse"
               >
                 <MapPin size={18} />
               </button>
@@ -255,9 +264,7 @@ export default function CompanyProfilePage() {
                 <button
                   key={a.value}
                   type="button"
-                  onClick={() =>
-                    setForm((f) => ({ ...f, activityType: a.value }))
-                  }
+                  onClick={() => setForm((f) => ({ ...f, activityType: a.value }))}
                   className="px-3 py-1.5 rounded-full text-xs font-sans font-light border"
                   style={
                     form.activityType === a.value
@@ -269,6 +276,19 @@ export default function CompanyProfilePage() {
                 </button>
               ))}
             </div>
+
+            <Input
+              placeholder="IBAN"
+              value={form.iban || ""}
+              onChange={(e) => setForm((f) => ({ ...f, iban: e.target.value }))}
+              className="rounded-xl h-12"
+            />
+            <Input
+              placeholder="BIC"
+              value={form.bic || ""}
+              onChange={(e) => setForm((f) => ({ ...f, bic: e.target.value }))}
+              className="rounded-xl h-12"
+            />
           </div>
           <DialogFooter className="flex gap-2 pt-2">
             <button
@@ -289,17 +309,14 @@ export default function CompanyProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
+      {/* ── Dialog supprimer ──────────────────────────────────────── */}
       <Dialog open={deleteDialog} onOpenChange={setDeleteDialog}>
         <DialogContent className="max-w-sm mx-auto rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="font-heading text-red-500">
-              Réinitialiser
-            </DialogTitle>
+            <DialogTitle className="font-heading text-red-500">Réinitialiser</DialogTitle>
           </DialogHeader>
           <p className="font-sans font-light text-sm" style={{ color: "#393E41" }}>
-            Toutes les données locales seront effacées. Tu retourneras à
-            l'accueil.
+            Toutes les données locales seront effacées. Tu retourneras à l'accueil.
           </p>
           <DialogFooter className="flex gap-2">
             <button
@@ -321,25 +338,22 @@ export default function CompanyProfilePage() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function InfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm">
-      <h2 className="font-heading text-base mb-3" style={{ color: "#393E41" }}>
-        {title}
-      </h2>
-      <Separator className="mb-3" />
-      {children}
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between items-center py-1.5 border-b border-gray-50 last:border-0">
-      <span className="font-sans font-light text-xs" style={{ color: "#9ca3af" }}>
+    <div className="flex items-center gap-3 py-1.5 border-b border-gray-50 last:border-0">
+      <span className="flex-shrink-0">{icon}</span>
+      <span className="font-sans font-light text-xs flex-shrink-0 w-20" style={{ color: "#9ca3af" }}>
         {label}
       </span>
-      <span className="font-sans font-light text-sm" style={{ color: "#393E41" }}>
+      <span className="font-sans font-light text-sm truncate" style={{ color: "#393E41" }}>
         {value}
       </span>
     </div>

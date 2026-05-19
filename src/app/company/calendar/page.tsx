@@ -46,8 +46,8 @@ export default function CompanyCalendarPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="px-4 pt-12 pb-4 bg-white border-b border-gray-100">
-        <h1 className="font-heading text-xl" style={{ color: "#393E41" }}>
+      <header className="px-5 pt-10 pb-4 bg-white border-b border-gray-100 lg:pt-6">
+        <h1 className="font-heading" style={{ color: "#393E41", fontSize: 26 }}>
           Calendrier
         </h1>
       </header>
@@ -70,7 +70,7 @@ export default function CompanyCalendarPage() {
             <div
               key={i}
               className="text-center text-xs font-sans py-1"
-              style={{ color: "#9ca3af" }}
+              style={{ color: "#6b7280" }}
             >
               {d}
             </div>
@@ -105,7 +105,7 @@ export default function CompanyCalendarPage() {
                     isToday
                       ? { backgroundColor: "#FD8F03", color: "white", fontWeight: 700 }
                       : isPast
-                      ? { color: "#d1d5db", opacity: 0.4 }
+                      ? { color: "#6b7280" }
                       : { color: "#393E41" }
                   }
                 >
@@ -156,7 +156,7 @@ export default function CompanyCalendarPage() {
                   <div
                     key={m.id}
                     className="rounded-xl p-4 border"
-                    style={{ borderColor: "#e2e3d8", backgroundColor: "#F6F7EB" }}
+                    style={{ borderColor: "#e2e3d8", backgroundColor: "#F4F4F4" }}
                   >
                     <p
                       className="font-heading text-sm"

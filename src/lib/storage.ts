@@ -44,6 +44,7 @@ export type StudentProfile = {
   skills: string[];
   jobTypes: string[];
   availabilities: Record<string, Record<string, boolean>>;
+  bio: string | null;
   iban: string | null;
   bic: string | null;
   photoUrl: string | null;

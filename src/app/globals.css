@@ -43,11 +43,11 @@
   --color-joby-orange: #FD8F03;
   --color-joby-blue: #2292A4;
   --color-joby-dark: #393E41;
-  --color-joby-bg: #F6F7EB;
+  --color-joby-bg: #F4F4F4;
 }
 
 :root {
-  --background: #F6F7EB;
+  --background: #F4F4F4;
   --foreground: #393E41;
   --card: #ffffff;
   --card-foreground: #393E41;
@@ -70,7 +70,7 @@
   --sidebar-foreground: #393E41;
   --sidebar-primary: #FD8F03;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #F6F7EB;
+  --sidebar-accent: #F4F4F4;
   --sidebar-accent-foreground: #393E41;
   --sidebar-border: #e2e3d8;
   --sidebar-ring: #FD8F03;
