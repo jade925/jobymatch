@@ -357,7 +357,7 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
             type="button"
             onClick={handleGeocodeAddress}
             className="px-3 h-12 rounded-xl"
-            style={{ backgroundColor: "#F6F7EB", color: "#2292A4" }}
+            style={{ backgroundColor: "#F4F4F4", color: "#2292A4" }}
           >
             <MapPin size={18} />
           </button>

@@ -58,7 +58,7 @@ export default function StudentCalendarPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="px-4 pt-12 pb-4 bg-white border-b border-gray-100">
+      <header className="px-4 pt-12 pb-4 lg:pt-6 bg-white border-b border-gray-100">
         <h1 className="font-heading text-xl" style={{ color: "#393E41" }}>
           Calendrier
         </h1>
@@ -168,7 +168,7 @@ export default function StudentCalendarPage() {
                   <div
                     key={m.id}
                     className="rounded-xl p-4 border"
-                    style={{ borderColor: "#e2e3d8", backgroundColor: "#F6F7EB" }}
+                    style={{ borderColor: "#e2e3d8", backgroundColor: "#F4F4F4" }}
                   >
                     <p
                       className="font-heading text-sm"

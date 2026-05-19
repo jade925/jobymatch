@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" fill="none">
+  <!-- Running figure -->
+  <!-- Head -->
+  <circle cx="175" cy="28" r="16" fill="#FD8F03"/>
+  <!-- Body/torso -->
+  <path d="M165 44 Q158 62 152 78 Q148 88 155 90 Q162 92 166 82 L172 64 L180 78 L192 100 Q196 108 190 112 Q184 116 180 106 L170 88 L160 110 Q156 120 148 118 Q140 116 144 106 L158 78 L152 56 Q156 48 165 44Z" fill="#FD8F03"/>
+  <!-- Left arm (holding briefcase) -->
+  <path d="M165 52 Q148 58 138 70 Q134 76 138 80 Q142 84 146 78 L158 66Z" fill="#FD8F03"/>
+  <!-- Briefcase -->
+  <rect x="124" y="68" width="20" height="16" rx="3" fill="#FD8F03"/>
+  <rect x="130" y="64" width="8" height="6" rx="2" stroke="#FD8F03" stroke-width="2" fill="none"/>
+  <line x1="124" y1="76" x2="144" y2="76" stroke="white" stroke-width="1.5"/>
+  <!-- Right arm (outstretched) -->
+  <path d="M172 50 Q190 44 202 36 Q208 32 206 28 Q204 24 198 26 L180 38Z" fill="#FD8F03"/>
+  <!-- Text JOBY -->
+  <text x="30" y="155" font-family="'Nunito', 'Poppins', Arial Rounded MT Bold, sans-serif" font-weight="800" font-size="54" fill="#FD8F03">JOBY</text>
+  <!-- Text MATCH -->
+  <text x="152" y="155" font-family="'Nunito', 'Poppins', Arial Rounded MT Bold, sans-serif" font-weight="800" font-size="54" fill="#2292A4">MATCH</text>
+</svg>

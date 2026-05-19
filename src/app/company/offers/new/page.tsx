@@ -7,7 +7,7 @@ export default function NewOfferPage() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#F6F7EB" }}>
+    <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#F4F4F4" }}>
       <header className="flex items-center gap-3 px-4 pt-12 pb-4 bg-white border-b border-gray-100">
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} style={{ color: "#393E41" }} />

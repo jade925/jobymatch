@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Logo } from "@/components/Logo";
-import { Plus, Calendar, Users, Edit2, Archive } from "lucide-react";
+import { Plus, Calendar, Euro, Users, Edit2, Archive } from "lucide-react";
 import { getOffers, saveOffer } from "@/lib/storage";
 import type { Offer } from "@/lib/storage";
 
@@ -38,14 +37,21 @@ export default function CompanyOffersPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="flex items-center justify-between px-4 pt-12 pb-4 bg-white border-b border-gray-100">
-        <Logo size="md" />
+      <header className="flex items-center justify-between px-5 pt-10 pb-4 bg-white border-b border-gray-100 lg:pt-6">
+        <div>
+          <h1 className="font-heading" style={{ color: "#393E41", fontSize: 26 }}>Mes offres</h1>
+          {offers.length > 0 && (
+            <p className="font-sans text-xs font-light mt-0.5" style={{ color: "#9ca3af" }}>
+              {offers.length} offre{offers.length > 1 ? "s" : ""} publiée{offers.length > 1 ? "s" : ""}
+            </p>
+          )}
+        </div>
         <button
           onClick={() => router.push("/company/offers/new")}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white font-heading text-sm"
-          style={{ backgroundColor: "#FD8F03" }}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-white font-heading text-sm"
+          style={{ backgroundColor: "#2292A4" }}
         >
-          <Plus size={16} />
+          <Plus size={15} />
           Nouvelle offre
         </button>
       </header>
@@ -89,21 +95,21 @@ export default function CompanyOffersPage() {
 
                 <div className="flex flex-col gap-1.5 mb-3">
                   <div className="flex items-center gap-1.5">
-                    <Calendar size={13} style={{ color: "#9ca3af" }} />
-                    <span
-                      className="font-sans font-light text-xs"
-                      style={{ color: "#6b7280" }}
-                    >
+                    <Calendar size={13} style={{ color: "#2292A4" }} />
+                    <span className="font-sans font-light text-xs" style={{ color: "#6b7280" }}>
                       {formatDate(offer.startDate)} → {formatDate(offer.endDate)}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Users size={13} style={{ color: "#9ca3af" }} />
-                    <span
-                      className="px-2 py-0.5 rounded-full text-xs font-sans text-white"
-                      style={{ backgroundColor: "#2292A4" }}
-                    >
-                      {offer.nbPositions} poste(s)
+                    <Euro size={13} style={{ color: "#2292A4" }} />
+                    <span className="font-sans font-light text-xs" style={{ color: "#6b7280" }}>
+                      {offer.hourlyRate.toFixed(2)} €/h
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Users size={13} style={{ color: "#2292A4" }} />
+                    <span className="font-sans font-light text-xs" style={{ color: "#6b7280" }}>
+                      {offer.nbPositions} poste(s) disponible(s)
                     </span>
                   </div>
                 </div>
