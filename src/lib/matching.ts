@@ -12,7 +12,7 @@ function scoreAvailabilities(
   studentAvail: Record<string, Record<string, boolean>>,
   schedules: Record<string, { start: string; end: string } | null>
 ): number {
-  const days = Object.keys(schedules);
+  const days = Object.keys(schedules ?? {});
   if (days.length === 0) return 100;
   let matched = 0;
   for (const day of days) {
