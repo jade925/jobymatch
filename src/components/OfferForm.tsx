@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Map, AdvancedMarker } from "@vis.gl/react-google-maps";
-import { MapProvider } from "@/components/MapProvider";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
@@ -96,12 +94,16 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
     if (!form.location) return;
     try {
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(form.location)}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(form.location)}&format=json&limit=1`,
+        { headers: { "Accept-Language": "fr" } }
       );
       const data = await res.json();
-      if (data.results?.[0]?.geometry?.location) {
-        const { lat, lng } = data.results[0].geometry.location;
-        setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
+      if (data[0]) {
+        setForm((f) => ({
+          ...f,
+          latitude: parseFloat(data[0].lat),
+          longitude: parseFloat(data[0].lon),
+        }));
       }
     } catch {}
   }
@@ -141,11 +143,6 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
     router.push("/company/offers");
     router.refresh();
   }
-
-  const mapCenter =
-    form.latitude && form.longitude
-      ? { lat: form.latitude, lng: form.longitude }
-      : { lat: 48.8566, lng: 2.3522 };
 
   return (
     <div className="flex flex-col gap-5 px-4 py-5">
@@ -363,29 +360,13 @@ export function OfferForm({ initialData, offerId, mode }: OfferFormProps) {
           </button>
         </div>
         {form.latitude && form.longitude && (
-          <MapProvider>
-            <div
-              className="rounded-2xl overflow-hidden mt-3"
-              style={{ height: 200 }}
-            >
-              <Map
-                defaultCenter={mapCenter}
-                defaultZoom={15}
-                gestureHandling="cooperative"
-                disableDefaultUI
-                mapId="offer-form-map"
-              >
-                <AdvancedMarker position={mapCenter}>
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center shadow"
-                    style={{ backgroundColor: "#FD8F03" }}
-                  >
-                    <MapPin size={14} color="white" />
-                  </div>
-                </AdvancedMarker>
-              </Map>
-            </div>
-          </MapProvider>
+          <div className="rounded-2xl overflow-hidden mt-3" style={{ height: 200 }}>
+            <iframe
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${form.longitude - 0.01},${form.latitude - 0.01},${form.longitude + 0.01},${form.latitude + 0.01}&layer=mapnik&marker=${form.latitude},${form.longitude}`}
+              className="w-full h-full border-0"
+              title="Localisation"
+            />
+          </div>
         )}
       </div>
 
