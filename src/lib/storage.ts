@@ -55,6 +55,7 @@ export type CompanyProfile = {
   companyName: string;
   siret: string | null;
   activityType: string;
+  description: string | null;
   address: string | null;
   latitude: number | null;
   longitude: number | null;

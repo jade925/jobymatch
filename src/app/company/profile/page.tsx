@@ -34,6 +34,7 @@ const DEFAULT_PROFILE: CompanyProfile = {
   companyName: "",
   siret: null,
   activityType: "AUTRE",
+  description: null,
   address: null,
   latitude: null,
   longitude: null,
@@ -146,6 +147,18 @@ export default function CompanyProfilePage() {
       {/* ── Contenu ───────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none pb-8">
 
+        {/* Notre histoire */}
+        {profile.description && (
+          <div className="bg-white rounded-2xl p-4 shadow-sm">
+            <h2 className="font-heading text-base mb-2" style={{ color: "#393E41" }}>
+              Notre histoire
+            </h2>
+            <p className="font-sans font-light text-sm leading-relaxed" style={{ color: "#6b7280" }}>
+              {profile.description}
+            </p>
+          </div>
+        )}
+
         {/* Contact */}
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-1">
           <h2 className="font-heading text-base mb-2" style={{ color: "#393E41" }}>
@@ -219,6 +232,14 @@ export default function CompanyProfilePage() {
               value={form.companyName}
               onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
               className="rounded-xl h-12"
+            />
+            <textarea
+              placeholder="Notre histoire (quelques mots sur votre entreprise…)"
+              value={form.description || ""}
+              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+              rows={4}
+              className="w-full px-4 py-3 rounded-xl text-sm font-sans font-light outline-none resize-none"
+              style={{ border: "1.5px solid #e2e3d8", backgroundColor: "#fafafa", color: "#393E41" }}
             />
             <Input
               placeholder="SIRET"

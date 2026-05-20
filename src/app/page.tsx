@@ -22,15 +22,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen flex flex-col" style={{ backgroundColor: "#F4F4F4" }}>
-      {/* Top gradient band */}
-      <div
-        className="absolute inset-x-0 top-0 h-64 pointer-events-none"
-        style={{
-          background: "linear-gradient(160deg, rgba(253,143,3,0.12) 0%, rgba(34,146,164,0.08) 100%)",
-        }}
-      />
-
-      <div className="relative flex-1 flex flex-col items-center justify-center px-6 py-16">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm flex flex-col items-center gap-10">
 
           {/* Logo complet avec silhouette */}

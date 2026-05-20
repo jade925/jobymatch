@@ -34,7 +34,12 @@ export default function RootLayout({
     <html
       lang="fr"
       className={`${leagueSpartan.variable} ${poppins.variable} h-full`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Applique .dark avant le premier rendu pour éviter le flash */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{if(localStorage.getItem('jm:darkMode')==='true')document.documentElement.classList.add('dark')}catch(e){}})()` }} />
+      </head>
       <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>
   );

@@ -10,17 +10,17 @@ const RATIO = 842 / 596; // ≈ 1.413
 
 // Full logo (character + JOBYMATCH) — used on vitrine
 const fullSizes = {
-  sm:  { w: 160, h: Math.round(160 / RATIO) }, // 113
-  md:  { w: 220, h: Math.round(220 / RATIO) }, // 156
-  lg:  { w: 280, h: Math.round(280 / RATIO) }, // 198
+  sm:  { w: 200, h: Math.round(200 / RATIO) }, // 141
+  md:  { w: 260, h: Math.round(260 / RATIO) }, // 184
+  lg:  { w: 340, h: Math.round(340 / RATIO) }, // 241
 };
 
 // Text-only logo (JOBYMATCH) — used in sidebars / nav
 // Keep height small; PNG has generous whitespace so objectFit:contain handles it
 const textSizes = {
-  sm: { w: 120, h: 48 },
-  md: { w: 150, h: 60 },
-  lg: { w: 200, h: 80 },
+  sm: { w: 150, h: 60 },
+  md: { w: 190, h: 76 },
+  lg: { w: 240, h: 96 },
 };
 
 export function Logo({ size = "md", variant = "text" }: LogoProps) {

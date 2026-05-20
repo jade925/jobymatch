@@ -8,6 +8,7 @@ const DEMO_COMPANY_PROFILE = {
   companyName: "Bistrot des Chartrons",
   siret: "85234718900012",
   activityType: "RESTAURATION",
+  description: "Bistrot bordelais fondé en 2008 au cœur des Chartrons. Cuisine du marché, vins naturels et ambiance chaleureuse. Nous accueillons chaque semaine des événements privés et soirées thématiques dans un cadre authentique.",
   address: "16 Rue des Bahutiers, 33000 Bordeaux",
   latitude: 44.8384,
   longitude: -0.5717,
