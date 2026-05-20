@@ -15,12 +15,12 @@ const fullSizes = {
   lg:  { w: 340, h: Math.round(340 / RATIO) }, // 241
 };
 
-// Text-only logo (JOBYMATCH) — used in sidebars / nav
-// Keep height small; PNG has generous whitespace so objectFit:contain handles it
+// Text-only logo SVG — viewBox 320×72, pas de whitespace → taille exacte
+// ratio = 320/72 ≈ 4.44
 const textSizes = {
-  sm: { w: 150, h: 60 },
-  md: { w: 190, h: 76 },
-  lg: { w: 240, h: 96 },
+  sm: { w: 156, h: 35 },
+  md: { w: 182, h: 41 },
+  lg: { w: 222, h: 50 },
 };
 
 export function Logo({ size = "md", variant = "text" }: LogoProps) {
@@ -40,13 +40,14 @@ export function Logo({ size = "md", variant = "text" }: LogoProps) {
 
   const d = textSizes[size];
   return (
-    <Image
-      src="/logo-joby-text.png"
+    // SVG : pas d'optimisation Next.js (pas de rasterisation nécessaire)
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/logo-joby-text.svg"
       alt="JOBYMATCH"
       width={d.w}
       height={d.h}
-      priority
-      style={{ objectFit: "contain", width: d.w, height: d.h }}
+      style={{ width: d.w, height: d.h, maxWidth: "100%" }}
     />
   );
 }

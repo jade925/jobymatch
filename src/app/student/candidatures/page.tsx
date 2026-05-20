@@ -169,20 +169,20 @@ export default function CandidaturesPage() {
                       {match.status === "ACCEPTE" && (
                         <button
                           onClick={() => router.push(`/student/chat/${match.id}`)}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-white font-sans text-sm"
+                          className="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-white font-sans text-xs"
                           style={{ backgroundColor: "#2292A4" }}
                         >
-                          <MessageCircle size={14} />
+                          <MessageCircle size={13} />
                           Écrire un message
                         </button>
                       )}
                       <button
                         onClick={() => router.push(`/student/missions/${match.offerId}`)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border font-sans text-sm"
+                        className="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl border font-sans text-xs"
                         style={{ borderColor: "#e2e3d8", color: "#393E41" }}
                       >
                         Voir l'offre
-                        <ChevronRight size={14} />
+                        <ChevronRight size={13} />
                       </button>
                       {match.status === "PENDING" && (
                         <button
