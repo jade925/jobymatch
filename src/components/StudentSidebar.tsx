@@ -18,7 +18,7 @@ export function StudentSidebar() {
 
   return (
     <aside className="hidden lg:flex flex-col w-56 border-r border-gray-200 bg-white h-full flex-shrink-0">
-      <div className="px-5 py-6 border-b border-gray-100">
+      <div className="px-5 py-6 border-b border-gray-100 flex justify-center">
         <Logo size="md" />
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
