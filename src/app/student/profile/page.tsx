@@ -197,81 +197,74 @@ export default function StudentProfilePage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* ── Hero header ── */}
-      <div className="relative bg-white border-b border-gray-100 overflow-hidden">
-        {/* Gradient band */}
-        <div
-          className="absolute inset-x-0 top-0 h-24 pointer-events-none"
-          style={{ background: "linear-gradient(135deg, rgba(253,143,3,0.15) 0%, rgba(34,146,164,0.08) 100%)" }}
-        />
-        <div className="relative px-5 pt-12 pb-5 lg:pt-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              {/* Avatar */}
-              <div
-                className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm"
-                style={{ background: "linear-gradient(135deg, #FD8F03 0%, rgba(253,143,3,0.7) 100%)" }}
-              >
-                <span className="font-heading text-3xl text-white">
-                  {profile.firstName ? profile.firstName.charAt(0).toUpperCase() : "?"}
-                </span>
-              </div>
-              <div>
-                <h1 className="font-heading text-xl leading-tight" style={{ color: "#393E41" }}>
-                  {displayName}
-                </h1>
-                {profile.diploma && (
-                  <p className="font-sans font-light text-sm mt-0.5" style={{ color: "#6b7280" }}>
-                    {profile.diploma}
-                  </p>
-                )}
-                {profile.school && (
-                  <p className="font-sans font-light text-xs mt-0.5" style={{ color: "#9ca3af" }}>
-                    {profile.school}
-                  </p>
-                )}
-              </div>
-            </div>
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => router.push("/student/settings")}
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: "#F4F4F4", color: "#9ca3af" }}
-              >
-                <Settings size={16} />
-              </button>
-              <button
-                onClick={() => { setForm(profile); setEditing(true); }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-sans font-light"
-                style={{ backgroundColor: "rgba(253,143,3,0.1)", color: "#FD8F03" }}
-              >
-                <Pencil size={13} />
-                Modifier
-              </button>
-            </div>
-          </div>
+      {/* ── Hero header — entièrement orange ── */}
+      <div
+        className="relative flex-shrink-0 px-5 pt-14 pb-5 lg:pt-6"
+        style={{ background: "linear-gradient(135deg, #FD8F03 0%, #e8820a 100%)" }}
+      >
+        {/* Actions en haut à droite */}
+        <div className="absolute top-4 right-4 lg:top-6 flex items-center gap-2">
+          <button
+            onClick={() => router.push("/student/settings")}
+            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
+          >
+            <Settings size={16} color="white" />
+          </button>
+          <button
+            onClick={() => { setForm(profile); setEditing(true); }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/20 text-white font-sans font-light text-sm"
+          >
+            <Pencil size={13} />
+            Modifier
+          </button>
+        </div>
 
-          {/* Bio */}
-          {profile.bio && (
-            <p className="font-sans font-light text-sm mt-4 leading-relaxed" style={{ color: "#6b7280" }}>
-              {profile.bio}
-            </p>
+        {/* Avatar */}
+        <div className="mb-3 mt-1">
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center"
+            style={{ backgroundColor: "rgba(255,255,255,0.25)" }}
+          >
+            <span className="font-heading text-3xl text-white">
+              {profile.firstName ? profile.firstName.charAt(0).toUpperCase() : "?"}
+            </span>
+          </div>
+        </div>
+
+        {/* Nom */}
+        <h1 className="font-heading text-xl leading-tight text-white">
+          {displayName}
+        </h1>
+        {profile.diploma && (
+          <p className="font-sans font-light text-sm mt-0.5 text-white/80">
+            {profile.diploma}
+          </p>
+        )}
+        {profile.school && (
+          <p className="font-sans font-light text-xs mt-0.5 text-white/60">
+            {profile.school}
+          </p>
+        )}
+
+        {/* Bio */}
+        {profile.bio && (
+          <p className="font-sans font-light text-sm mt-4 leading-relaxed text-white/80">
+            {profile.bio}
+          </p>
+        )}
+
+        {/* Quick stats */}
+        <div className="flex gap-3 mt-4 flex-wrap">
+          {profile.phone && (
+            <span className="text-xs font-sans font-light px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "white" }}>
+              📞 {profile.phone}
+            </span>
           )}
-
-          {/* Quick stats */}
-          <div className="flex gap-3 mt-4 flex-wrap">
-            {profile.phone && (
-              <span className="text-xs font-sans font-light px-2.5 py-1 rounded-full" style={{ backgroundColor: "#F4F4F4", color: "#6b7280" }}>
-                📞 {profile.phone}
-              </span>
-            )}
-            {profile.address && (
-              <span className="text-xs font-sans font-light px-2.5 py-1 rounded-full" style={{ backgroundColor: "#F4F4F4", color: "#6b7280" }}>
-                📍 {profile.address.split(",")[0]}
-              </span>
-            )}
-          </div>
+          {profile.address && (
+            <span className="text-xs font-sans font-light px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "white" }}>
+              📍 {profile.address.split(",")[0]}
+            </span>
+          )}
         </div>
       </div>
 
@@ -400,7 +393,7 @@ export default function StudentProfilePage() {
           <button
             onClick={() => { clearRole(); router.push("/"); }}
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border font-sans font-light text-sm"
-            style={{ borderColor: "#e2e3d8", color: "#9ca3af" }}
+            style={{ borderColor: "#2292A4", color: "#2292A4", backgroundColor: "rgba(34,146,164,0.06)" }}
           >
             <LogOut size={16} />
             Changer de rôle
@@ -449,9 +442,9 @@ export default function StudentProfilePage() {
               placeholder="Bio (quelques mots sur toi…)"
               value={form.bio || ""}
               onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
-              rows={2}
+              rows={4}
               className="w-full px-4 py-3 rounded-xl text-sm font-sans font-light outline-none resize-none"
-              style={{ border: "1.5px solid #e2e3d8", backgroundColor: "#fafafa", color: "#393E41" }}
+              style={{ border: "1.5px solid #e2e3d8", backgroundColor: "#fafafa", color: "#393E41", minHeight: "96px" }}
             />
             <Input
               placeholder="Téléphone"

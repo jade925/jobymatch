@@ -104,3 +104,14 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Dark mode — inversion couleur-préservante (hue-rotate compense invert) */
+html.dark body {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #111;
+}
+html.dark img,
+html.dark iframe,
+html.dark video {
+  filter: invert(1) hue-rotate(180deg);
+}

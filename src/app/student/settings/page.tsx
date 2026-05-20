@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Bell, Shield, Info, ChevronRight, Moon, Globe } from "lucide-react";
 
@@ -49,6 +50,19 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function SettingsPage() {
   const router = useRouter();
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    setDarkMode(localStorage.getItem("jm:darkMode") === "true");
+  }, []);
+
+  function toggleDarkMode() {
+    const next = !darkMode;
+    setDarkMode(next);
+    localStorage.setItem("jm:darkMode", String(next));
+    if (next) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+  }
 
   return (
     <div className="flex flex-col min-h-full">
@@ -95,12 +109,18 @@ export default function SettingsPage() {
         {/* Apparence */}
         <Section title="Apparence">
           <Row
-            icon={<Moon size={16} style={{ color: "#393E41" }} />}
+            icon={<Moon size={16} style={{ color: darkMode ? "#FD8F03" : "#393E41" }} />}
             label="Mode sombre"
-            description="Bientôt disponible"
+            onClick={toggleDarkMode}
             action={
-              <div className="w-11 h-6 rounded-full flex items-center px-1" style={{ backgroundColor: "#e2e3d8", opacity: 0.5 }}>
-                <div className="w-4 h-4 rounded-full bg-white shadow-sm" />
+              <div
+                className="w-11 h-6 rounded-full flex items-center px-1 transition-colors"
+                style={{ backgroundColor: darkMode ? "#FD8F03" : "#e2e3d8" }}
+              >
+                <div
+                  className="w-4 h-4 rounded-full bg-white shadow-sm transition-transform"
+                  style={{ transform: darkMode ? "translateX(20px)" : "translateX(0)" }}
+                />
               </div>
             }
           />

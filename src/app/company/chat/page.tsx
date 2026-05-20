@@ -81,20 +81,35 @@ function ConvRow({
   );
 }
 
+const DEMO_CANDIDATE_NAMES: Record<string, string> = {
+  "demo-match-1": "Léa Martin",
+  "demo-match-2": "Thomas Dupont",
+  "demo-match-3": "Camille Bernard",
+  "demo-match-4": "Noah Petit",
+  "demo-match-5": "Emma Rousseau",
+  "demo-match-6": "Léa Martin",
+  "demo-match-7": "Léa Martin",
+  "demo-match-8": "Noah Petit",
+  "demo-match-9": "Emma Rousseau",
+};
+
+function getCandidateName(match: Match, fallback: string): string {
+  return DEMO_CANDIDATE_NAMES[match.id] ?? fallback;
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function CompanyChatPage() {
   const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [selected, setSelected] = useState<Match | null>(null);
-  const [candidateName, setCandidateName] = useState("Étudiant(e)");
+  const [defaultName, setDefaultName] = useState("Étudiant(e)");
 
   function load() {
     const all = getMatches().filter((m) => m.status !== "REFUSE");
     setMatches(all);
-    // Try to get actual candidate name from demo profile
     const profile = getStudentProfile();
     if (profile?.firstName) {
-      setCandidateName(`${profile.firstName} ${profile.lastName ?? ""}`.trim());
+      setDefaultName(`${profile.firstName} ${profile.lastName ?? ""}`.trim());
     }
   }
 
@@ -170,7 +185,7 @@ export default function CompanyChatPage() {
                   key={m.id}
                   match={m}
                   selected={selected?.id === m.id}
-                  candidateName={candidateName}
+                  candidateName={getCandidateName(m, defaultName)}
                   onSelect={() => handleSelect(m)}
                   onAccept={() => handleAccept(m.id)}
                   onRefuse={() => handleRefuse(m.id)}
@@ -185,7 +200,7 @@ export default function CompanyChatPage() {
           <ChatThread
             match={selected}
             senderRole="company"
-            candidateName={candidateName}
+            candidateName={getCandidateName(selected, defaultName)}
           />
         ) : (
           <ChatEmptyState />

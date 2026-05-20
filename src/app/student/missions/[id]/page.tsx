@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { MapPin, Calendar, Euro, Users, ArrowLeft, Bookmark, X, Globe, Building2 } from "lucide-react";
+import { MapPin, Calendar, Euro, Users, ArrowLeft, Heart, X, Globe, Building2 } from "lucide-react";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { DEMO_OFFERS } from "@/lib/demo-data";
 import {
@@ -115,7 +115,7 @@ export default function OfferDetailPage() {
           className="absolute top-12 right-4 lg:top-4 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-colors"
           style={{ backgroundColor: saved ? "#FD8F03" : "rgba(255,255,255,0.2)" }}
         >
-          <Bookmark size={18} color="white" fill={saved ? "white" : "none"} />
+          <Heart size={18} color="white" fill={saved ? "white" : "none"} />
         </button>
 
         <div className="absolute bottom-0 left-4 right-4 flex items-end gap-3 pb-4">
@@ -141,7 +141,7 @@ export default function OfferDetailPage() {
       <div className="flex-1 overflow-y-auto px-4 pt-5 pb-28 lg:pb-6">
         <div className="flex flex-col lg:flex-row gap-5">
 
-          {/* LEFT — Description + infos + desktop CTA */}
+          {/* LEFT — Description + infos */}
           <div className="flex-1 flex flex-col gap-5">
             <div className="bg-white rounded-2xl p-4 shadow-sm">
               <h2 className="font-heading text-base mb-2" style={{ color: "#393E41" }}>Missions du poste</h2>
@@ -180,15 +180,6 @@ export default function OfferDetailPage() {
                 </div>
               )}
             </div>
-
-            {/* Desktop CTA — inside the left column */}
-            <button
-              onClick={handleApply}
-              className="hidden lg:block w-full py-4 rounded-xl text-white font-heading text-base shadow-sm mt-auto"
-              style={{ backgroundColor: applied ? "#9ca3af" : "#FD8F03" }}
-            >
-              {applied ? "Retirer ma candidature" : "Postuler à cette mission"}
-            </button>
           </div>
 
           {/* RIGHT — Map */}
@@ -208,6 +199,15 @@ export default function OfferDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Desktop CTA — full width below the two-column layout */}
+        <button
+          onClick={handleApply}
+          className="hidden lg:block w-full py-4 rounded-xl text-white font-heading text-base shadow-sm mt-1"
+          style={{ backgroundColor: applied ? "#9ca3af" : "#FD8F03" }}
+        >
+          {applied ? "Retirer ma candidature" : "Postuler à cette mission"}
+        </button>
       </div>
 
       {/* Bottom CTA — fixed on mobile only */}
