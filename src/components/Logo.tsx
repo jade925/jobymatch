@@ -15,12 +15,12 @@ const fullSizes = {
   lg:  { w: 340, h: Math.round(340 / RATIO) }, // 241
 };
 
-// Text-only logo SVG — viewBox 320×72, pas de whitespace → taille exacte
-// ratio = 320/72 ≈ 4.44
+// Text-only logo SVG — viewBox 380×72, ratio ≈ 5.28
+// Tailles conservatrices pour tenir dans la sidebar w-56 (px-5 → 184px dispo)
 const textSizes = {
-  sm: { w: 156, h: 35 },
-  md: { w: 182, h: 41 },
-  lg: { w: 222, h: 50 },
+  sm: { w: 120, h: 23 },
+  md: { w: 148, h: 28 },
+  lg: { w: 180, h: 34 },
 };
 
 export function Logo({ size = "md", variant = "text" }: LogoProps) {
